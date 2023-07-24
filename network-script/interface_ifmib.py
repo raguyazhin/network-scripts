@@ -2,6 +2,9 @@ from pysnmp.hlapi import *
 import binascii
 import json
 
+import threading
+import time
+
 import mysql.connector
 from db_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
@@ -19,7 +22,6 @@ def convert_mac(mac):
 
 def snmp_get(community, ip_address, port, oid, username, auth_protocol, auth_password):
     
-   
     target_v2 = SnmpEngine()
     community = CommunityData(community, mpModel=1) 
     transport_v2 = UdpTransportTarget((ip_address, port)) 
@@ -119,11 +121,11 @@ def snmp_walk(community, ip_address, port, oid, username, auth_protocol, auth_pa
             for errorIndication_v3, errorStatus_v3, errorIndex_v3, varBinds_v3 in iterator_v3:
 
                 if errorIndication_v3:
-                    print(f"SNMPv3 Error: {errorIndication_v3}")
+                    #print(f"SNMPv3 Error: {errorIndication_v3}")
                     return []
                 
                 elif errorStatus_v3:
-                    print(f"SNMPv3 Error: {errorStatus_v3.prettyPrint()} at {errorIndex_v3 and varBinds_v3[int(errorIndex_v3) - 1][0] or '?'}")
+                    #print(f"SNMPv3 Error: {errorStatus_v3.prettyPrint()} at {errorIndex_v3 and varBinds_v3[int(errorIndex_v3) - 1][0] or '?'}")
                     return []
                 
                 else:
@@ -131,14 +133,16 @@ def snmp_walk(community, ip_address, port, oid, username, auth_protocol, auth_pa
                         result_dic[str(varBind[0])] = varBind[1]
         
         elif errorStatus_v2:
-            print(f"SNMPv2 Error: {errorStatus_v2.prettyPrint()} at {errorIndex_v2 and varBinds_v2[int(errorIndex_v2) - 1][0] or '?'}")
+            #print(f"SNMPv2 Error: {errorStatus_v2.prettyPrint()} at {errorIndex_v2 and varBinds_v2[int(errorIndex_v2) - 1][0] or '?'}")
             return []
         
         else:
             for varBind in varBinds_v2:
                 result_dic[str(varBind[0])] = varBind[1]
 
-    return result_dicgit 
+    return result_dic 
+
+ip_results = {}
 
 def get_interface_if_data(ip_address):
 
@@ -203,7 +207,7 @@ def get_interface_if_data(ip_address):
     jsonString = jsonString + ']'
     jsonString = jsonString + '}'
    
-    return jsonString  
+    ip_results[ip_address] = jsonString
 
 cnx = mysql.connector.connect(
         host=DB_HOST,
@@ -214,14 +218,31 @@ cnx = mysql.connector.connect(
 
 ip_address_table = "ip_master";
 
-ip_results = {}
+interface_ifmib_table = "interface_ifmib";
 
 cursor = cnx.cursor()
 query = "SELECT ip_address from " + ip_address_table +  " where ip_type_id=3 and ip_service_provider_id=6 and is_active=1"
 cursor.execute(query)
 rows = cursor.fetchall()
 
-for row in rows:
-    print(row[0])
+threads = []
 
-    print(get_interface_if_data(row[0]))
+for row in rows:
+    ipadd = row[0]
+    thread = threading.Thread(target=get_interface_if_data, args=(ipadd,))
+    thread.start()
+    threads.append(thread)
+
+for thread in threads:
+    thread.join()
+
+for address, result in ip_results.items():
+
+    insert_query = "INSERT INTO " + interface_ifmib_table +  " (date_on,ip_address,ifmib_data) Values (now(), %s, %s)"
+       
+    cursor.execute(insert_query, (address, result))
+    print(f"IP address {address} is {result}")
+
+cnx.commit()
+cursor.close()
+cnx.close()
