@@ -138,7 +138,7 @@ def snmp_walk(community, ip_address, port, oid, username, auth_protocol, auth_pa
             for varBind in varBinds_v2:
                 result_dic[str(varBind[0])] = varBind[1]
 
-    return result_dic
+    return result_dicgit 
 
 def get_interface_if_data(ip_address):
 
