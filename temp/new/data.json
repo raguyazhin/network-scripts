@@ -1,0 +1,280 @@
+{
+    "group0": [
+        {
+            "id": "Core_Switch",
+            "ipaddress": "172.20.1.110"
+        }
+    ],
+    "group1": [
+        {
+            "id": "DellRack_Switch",
+            "ipaddress": "172.20.10.211",
+            "parentDeviceid": "Core_Switch"
+        },
+        {
+            "id": "DC-Distribution1",
+            "ipaddress": "172.20.1.193",
+            "parentDeviceid": "Core_Switch"
+        },
+        {
+            "id": "MIG_Standby.sankaranethralaya.org",
+            "ipaddress": "172.20.9.250",
+            "parentDeviceid": "Core_Switch"
+        },
+        {
+            "id": "CoreSwitch_4503.sankaranethralaya.com",
+            "ipaddress": "172.20.10.210",
+            "parentDeviceid": "Core_Switch"
+        },
+        {
+            "id": "Metha_Basement",
+            "ipaddress": "172.20.1.74",
+            "parentDeviceid": "Core_Switch"
+        },
+        {
+            "id": "JKCN_Flr_Ground2",
+            "ipaddress": "172.20.1.89",
+            "parentDeviceid": "Core_Switch"
+        },
+        {
+            "id": "KBRIVO_MAIN",
+            "ipaddress": "172.20.8.100",
+            "parentDeviceid": "Core_Switch"
+        },
+        {
+            "id": "vgbasement",
+            "ipaddress": "172.20.9.13",
+            "parentDeviceid": "Core_Switch"
+        },
+        {
+            "id": "MB_2nd_Main",
+            "ipaddress": "172.20.1.75",
+            "parentDeviceid": "Core_Switch"
+        },
+        {
+            "id": "Core_3945_Router.sankaranethralaya.org",
+            "ipaddress": "172.20.1.126",
+            "parentDeviceid": "Core_Switch"
+        }
+    ],
+    "group2": [
+        {
+            "id": "Dellrack_New",
+            "ipaddress": "172.20.10.212",
+            "parentDeviceid": "DellRack_Switch"
+        },
+        {
+            "id": "RI_4th_Floor",
+            "ipaddress": "172.20.8.132",
+            "parentDeviceid": "MIG_Standby.sankaranethralaya.org"
+        },
+        {
+            "id": "Communication",
+            "ipaddress": "172.20.9.251",
+            "parentDeviceid": "Metha_Basement"
+        },
+        {
+            "id": "JKCN_5th_Floor",
+            "ipaddress": "172.20.1.119",
+            "parentDeviceid": "JKCN_Flr_Ground2"
+        },
+        {
+            "id": "JKCN_GR_FLR_New",
+            "ipaddress": "172.20.1.231",
+            "parentDeviceid": "JKCN_Flr_Ground2"
+        },
+        {
+            "id": "VG_Drug_Counter",
+            "ipaddress": "172.20.1.121",
+            "parentDeviceid": "vgbasement"
+        },
+        {
+            "id": "Mahyco_2nd_Floor",
+            "ipaddress": "172.20.1.233",
+            "parentDeviceid": "MB_2nd_Main"
+        },
+        {
+            "id": "Mahyco_1_Floor",
+            "ipaddress": "172.20.1.111",
+            "parentDeviceid": "MB_2nd_Main"
+        },
+        {
+            "id": "Maycho3rd_Floor",
+            "ipaddress": "172.20.8.253",
+            "parentDeviceid": "MB_2nd_Main"
+        },
+        {
+            "id": "MB_Flr_Basement.sankaranethralaya.com",
+            "ipaddress": "172.20.1.115",
+            "parentDeviceid": "MB_2nd_Main"
+        },
+        {
+            "id": "MB_5th_FL_2",
+            "ipaddress": "172.20.8.239",
+            "parentDeviceid": "MB_2nd_Main"
+        },
+        {
+            "id": "MB-6thCSR",
+            "ipaddress": "172.20.8.124",
+            "parentDeviceid": "MB_2nd_Main"
+        },
+        {
+            "id": "SSB_FLOOR_2_STANDBY",
+            "ipaddress": "172.20.8.118",
+            "parentDeviceid": "MB_2nd_Main"
+        },
+        {
+            "id": "Mahyco_OT",
+            "ipaddress": "172.20.4.18",
+            "parentDeviceid": "MB_2nd_Main"
+        },
+        {
+            "id": "6c710d796a47",
+            "ipaddress": "172.20.10.215",
+            "parentDeviceid": "MB_2nd_Main"
+        },
+        {
+            "id": "Navasuja.sankaranethralaya.com",
+            "ipaddress": "172.17.1.2",
+            "parentDeviceid": "Core_3945_Router.sankaranethralaya.org"
+        },
+        {
+            "id": "REH.yourdomain.com",
+            "ipaddress": "172.17.1.4",
+            "parentDeviceid": "Core_3945_Router.sankaranethralaya.org"
+        },
+        {
+            "id": "Switch",
+            "ipaddress": "",
+            "parentDeviceid": "Core_3945_Router.sankaranethralaya.org"
+        },
+        {
+            "id": "KolkataMukundpur.sankaranethralaya.com",
+            "ipaddress": "172.16.0.5",
+            "parentDeviceid": "Core_3945_Router.sankaranethralaya.org"
+        }
+    ],
+    "group3": [
+        {
+            "id": "JKCN-Ubi",
+            "ipaddress": "172.20.10.114",
+            "parentDeviceid": "JKCN_5th_Floor"
+        },
+        {
+            "id": "SSB_Floor_5.sankaranethralaya.com",
+            "ipaddress": "172.20.8.115",
+            "parentDeviceid": "JKCN_GR_FLR_New"
+        },
+        {
+            "id": "Saipam-A",
+            "ipaddress": "192.168.0.2",
+            "parentDeviceid": "JKCN_GR_FLR_New"
+        },
+        {
+            "id": "mahyco2flrsw2",
+            "ipaddress": "172.20.1.209",
+            "parentDeviceid": "Mahyco_2nd_Floor"
+        },
+        {
+            "id": "Switch",
+            "ipaddress": "0.0.0.0",
+            "parentDeviceid": "MB-6thCSR"
+        },
+        {
+            "id": "NavasujaSwitch",
+            "ipaddress": "172.21.1.230",
+            "parentDeviceid": "Navasuja.sankaranethralaya.com"
+        },
+        {
+            "id": "Core_3945_Router.sankaranethralaya.org",
+            "ipaddress": "172.17.1.10",
+            "parentDeviceid": "Navasuja.sankaranethralaya.com"
+        },
+        {
+            "id": "REH-NEW2",
+            "ipaddress": "172.22.1.8",
+            "parentDeviceid": "REH.yourdomain.com"
+        },
+        {
+            "id": "REH-NEW2",
+            "ipaddress": "172.22.1.8",
+            "parentDeviceid": "REH.yourdomain.com"
+        },
+        {
+            "id": "Core_3945_Router.sankaranethralaya.org",
+            "ipaddress": "172.17.1.10",
+            "parentDeviceid": "REH.yourdomain.com"
+        },
+        {
+            "id": "Kol_5F_SW1",
+            "ipaddress": "172.25.1.240",
+            "parentDeviceid": "KolkataMukundpur.sankaranethralaya.com"
+        },
+        {
+            "id": "(Jadavpur)SankaraNethralaya147Mukundapur to FBN(FENT)",
+            "ipaddress": "1.1.1.3",
+            "parentDeviceid": "KolkataMukundpur.sankaranethralaya.com"
+        },
+        {
+            "id": "Core_3945_Router.sankaranethralaya.org",
+            "ipaddress": "172.16.0.1",
+            "parentDeviceid": "KolkataMukundpur.sankaranethralaya.com"
+        }
+    ],
+    "group4": [
+        {
+            "id": "SSB_GR_Floor.sankaranethralaya.com",
+            "ipaddress": "172.20.8.110",
+            "parentDeviceid": "SSB_Floor_5.sankaranethralaya.com"
+        },
+        {
+            "id": "SSB_Floor_6.sankaranethralaya.com",
+            "ipaddress": "172.20.8.116",
+            "parentDeviceid": "SSB_Floor_5.sankaranethralaya.com"
+        },
+        {
+            "id": "Navasuja.sankaranethralaya.com",
+            "ipaddress": "172.24.2.1",
+            "parentDeviceid": "NavasujaSwitch"
+        },
+        {
+            "id": "045fb908b134",
+            "ipaddress": "172.21.1.16",
+            "parentDeviceid": "NavasujaSwitch"
+        },
+        {
+            "id": "Navasuja.sankaranethralaya.com",
+            "ipaddress": "172.21.1.1",
+            "parentDeviceid": "NavasujaSwitch"
+        },
+        {
+            "id": "KolkataMukundpur.sankaranethralaya.com",
+            "ipaddress": "172.25.1.1",
+            "parentDeviceid": "Kol_5F_SW1"
+        },
+        {
+            "id": "Kol_5F_SW2",
+            "ipaddress": "172.25.1.241",
+            "parentDeviceid": "Kol_5F_SW1"
+        }
+    ],
+    "group5": [
+        {
+            "id": "Kol_GF_SW1",
+            "ipaddress": "172.25.1.244",
+            "parentDeviceid": "Kol_5F_SW2"
+        },
+        {
+            "id": "Kol_1F_SW1",
+            "ipaddress": "172.25.1.243",
+            "parentDeviceid": "Kol_5F_SW2"
+        },
+        {
+            "id": "Switch",
+            "ipaddress": "172.25.1.239",
+            "parentDeviceid": "Kol_5F_SW2"
+        }
+    ],
+    "group6": [],
+    "group7": []
+}

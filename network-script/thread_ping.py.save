@@ -1,0 +1,68 @@
+import subprocess
+import threading
+import time
+
+import mysql.connector
+
+while True:
+
+    # Establish a connection to the MySQL database
+    cnx = mysql.connector.connect(
+        host='172.20.10.56',
+        user='root',
+        password='Server@2016',
+        database='netmon'
+    )
+
+    ip_address_table = "ip_master";
+
+    ip_results = {}
+
+    #ip_addresses = ['172.20.1.244', '172.16.1.24', '8.8.8.8']
+
+    def ping(address):
+        #result = subprocess.run(["ping", "-c", "1", "-W", "1", address], capture_output=True, text=True)
+        status = subprocess.call(['ping', '-c', '4
+', address],)
+        if status == 0:
+            ip_results[address] = "1"
+        else:
+            ip_results[address] = "0"
+
+    threads = []
+
+
+    cursor = cnx.cursor()
+
+    query = "SELECT ip_address from " + ip_address_table +  " where is_active=1"
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+        address = row[0]
+        thread = threading.Thread(target=ping, args=(address,))
+        thread.start()
+        threads.append(thread)
+
+    # for address in ip_addresses:
+    #     thread = threading.Thread(target=ping, args=(address,))
+    #     thread.start()
+    #     threads.append(thread)
+
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
+
+    # Print the IP status results
+    for address, status in ip_results.items():
+        update_query = "UPDATE " + ip_address_table +  " SET current_status = %s WHERE ip_address = %s"
+        cursor.execute(update_query, (status, address))
+        print(f"IP address {address} is {status}")
+
+    # Close the cursor and connection
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+    time.sleep(10)

@@ -1,0 +1,30 @@
+
+
+Script Path: /data/network-script/
+
+IP ping service script has been as a service 
+script-name: thread_ping.py
+systemctl status ip_ping_service.service
+
+
+IP Packet drops script service
+script-name: thread_packet_drops.py
+systemctl status ip_packet_drops.service
+
+
+URL Current Status script service
+script-name: url_current_status.py
+systemctl status url_status.service
+
+
+
+cd /etc/systemd/system/
+
+Create service in the path
+systemctl daemon-reload
+systemctl enable ip_packet_drops.service
+systemctl status ip_packet_drops.service
+systemctl start ip_packet_drops.service
+
+
+

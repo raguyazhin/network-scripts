@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<svg baseProfile="tiny" height="100%" version="1.2" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs /><circle cx="50" cy="50" fill="red" r="30" /><rect fill="blue" height="60" width="80" x="100" y="80" /><line stroke="black" stroke-width="2" x1="50" x2="150" y1="50" y2="100" /><image height="100" width="100" x="200" xlink:href="https://example.com/image.png" y="50" /></svg>

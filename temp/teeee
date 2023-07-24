@@ -1,0 +1,312 @@
+<?php
+
+Class MacIPTrackModel extends CI_Model {
+    
+    private $network_db;
+    
+    function __construct()
+    {
+        parent::__construct();
+        $this->network_db = $this->load->database('networkdb',TRUE);
+    }
+
+    Public Function Get_SNMP_Data($ip_address,$snmp,$oid,$snmp_version=1)
+    {   
+        
+        if ($snmp_version==1)
+        {
+            $snmp_oid = snmprealwalk($ip_address,$snmp,$oid);
+        }
+        else if ($snmp_version==2)
+        {
+            $snmp_oid = snmp2_real_walk($ip_address,$snmp,$oid);
+        }
+        else if ($snmp_version==3){
+            
+            $snmp3data= $this->snmp3data($ip_address);
+            
+            $snmp_oid = snmp3_real_walk($ip_address, $snmp3data[0]['SNMP_USERNAME'], 'authNoPriv', $snmp3data[0]['SNMP_AUTH_PROTOCOL'], $snmp3data[0]['SNMP_PASSWORD'], $snmp3data[0]['SNMP_PRIV_PROTOCOL'], $snmp3data[0]['SNMP_PASSWORD'], $oid);
+            
+           
+            //$ret = snmp3_real_walk('172.20.1.111', 'network', 'authNoPriv', 'MD5', '$nN3tw0rK', 'DES', '$nN3tw0rK', '1.3.6.1.2.1.17.1.4.1.2.43');
+            
+            //print_r($ret);
+            //echo $oid;
+            
+        }
+        else
+        {
+          $snmp_oid = snmprealwalk($ip_address,$snmp,$oid);  
+        }
+        
+        /*
+        if ($ip_address == '172.20.10.210')
+        {
+           $snmp_oid = snmp3_real_walk($ip_address, 'network', 'authNoPriv', 'MD5', '$nN3tw0rK', 'DES', '$nN3tw0rK', '1.3.6.1.2.1.3.1.1.2');
+        }else{
+        
+        $snmp_oid = snmprealwalk($ip_address,$snmp,$oid);
+        }
+        */
+        return $snmp_oid;
+        
+    }    
+    
+    public function snmp3data($host){
+        
+        $sql="Select * from IP_MASTER Where IP_ADDRESS='" . $host . "'";
+ 
+        $query = $this->network_db->query($sql);        
+        return $query->result_array();
+        
+    }
+    
+    Public Function Get_Switch_Mac_IP_Data($switch_ip_address,$arp_router_ip,$snmp_com, $bridge_port_oid,$mac_address_oid,$if_index,$port_name_oid,$local_port_oid,$trunck_port_oid,$vlan_oid,$vlan_name_oid,$arp_ip_add,$arp_mac_add_oid){
+
+        $snmpdata = $this->snmp3data($switch_ip_address);
+        
+        $vlan_id_data = $this->Get_SNMP_Data($switch_ip_address,$snmp_com,$vlan_oid,INTVAL($snmpdata[0]['SNMP_VERSION'])); 
+        $vlan_name_data = $this->Get_SNMP_Data($switch_ip_address,$snmp_com,$vlan_name_oid,INTVAL($snmpdata[0]['SNMP_VERSION'])); 
+        $trunck_port_data = $this->Get_SNMP_Data($switch_ip_address,$snmp_com,$trunck_port_oid,INTVAL($snmpdata[0]['SNMP_VERSION'])); 
+        
+        $vlan_id_data = array_unique($vlan_id_data);
+        $vlan_name_data = array_unique($vlan_name_data);
+         
+
+            $this->network_db->trans_begin();
+        
+            $sql="Delete From port_data Where switch_ip_address='" . $switch_ip_address . "'";   
+            $insert = $this->network_db->query($sql);
+            
+            $sql="Delete From vlan_name Where switch_ip_address='" . $switch_ip_address . "'";   
+            $insert = $this->network_db->query($sql);
+        
+            $sql="Delete From trunck_port Where switch_ip_address='" . $switch_ip_address . "'";   
+            $insert = $this->network_db->query($sql);
+            
+            $sql="Delete From arp_mac_add Where switch_ip_address='" . $switch_ip_address . "'";   
+            $insert = $this->network_db->query($sql);
+ 
+            
+        foreach($vlan_id_data as $vlanindex => $vlanvalue){
+          
+//            echo $vlanindex .'<br>';
+//            echo $vlanvalue.'<br>';
+
+            $vlanindex=$vlanindex.";";
+
+            $vlan_oid=$vlan_oid . ";";
+
+            $len=$this->utility->Str_ColumnCount($vlan_oid,1,";",".");
+
+            $len += 1;
+
+            $vlanindex = $this->utility->str_block($vlanindex,$len,1000,";",".");
+
+            $vlanindex=$this->utility->Chop_Last_Char($vlanindex);
+            $vlanvalue=trim($this->utility->SNMP_Clean_Output($vlanvalue));
+            $vlan_oid=$this->utility->Chop_Last_Char($vlan_oid);
+            
+//            $sql="Insert into vlan_id values('".  $switch_ip_address . "','" . $vlanindex ."','" . $vlanvalue . "')";  
+//            $insert = $this->network_db->query($sql);
+
+                $MACadresses = $this->Get_SNMP_Data($switch_ip_address, $snmp_com.'@'.$vlanvalue,$mac_address_oid,INTVAL($snmpdata[0]['SNMP_VERSION']));
+
+                 foreach($MACadresses as $macindex => $macvalue){
+
+//                      echo $macindex .'<br>';
+//                      echo $macvalue.'<br>';
+
+                    $macindex=$macindex.";";
+
+                    $mac_address_oid=$mac_address_oid . ";";
+
+                    $len=$this->utility->Str_ColumnCount($mac_address_oid,1,";",".");
+
+                    $len += 1;
+
+                    $macindex = $this->utility->str_block($macindex,$len,1000,";",".");
+
+                    $macindex=$this->utility->Chop_Last_Char($macindex);
+                    $macvalue=trim($this->utility->SNMP_Clean_Output($macvalue));
+                    $mac_address_oid=$this->utility->Chop_Last_Char($mac_address_oid);
+
+                        $sql="Insert into mac_addresses values('".  $switch_ip_address . "','" . $macindex ."','" . $macvalue ."','" . $vlanvalue . "')";  
+                        $insert = $this->network_db->query($sql);
+
+                 }
+                 
+            $BridgePort = $this->Get_SNMP_Data($switch_ip_address, $snmp_com.'@'.$vlanvalue, $bridge_port_oid,INTVAL($snmpdata[0]['SNMP_VERSION']));
+                        
+            foreach($BridgePort as $briportindex => $briportvalue){
+                 
+//                echo 'bri port index ' .$briportindex .'<br>';
+//                echo 'bri port value ' . $briportvalue.'<br>';
+                 
+                $briportindex=$briportindex.";";
+
+                $bridge_port_oid=$bridge_port_oid . ";";
+
+                $len=$this->utility->Str_ColumnCount($bridge_port_oid,1,";",".");
+
+                $len += 1;
+
+                $briportindex = $this->utility->str_block($briportindex,$len,1000,";",".");
+
+                $briportindex=$this->utility->Chop_Last_Char($briportindex);
+                $briportvalue=trim($this->utility->SNMP_Clean_Output($briportvalue));
+                $bridge_port_oid=$this->utility->Chop_Last_Char($bridge_port_oid);
+
+//                $sql="Insert into bridge_port values('".  $switch_ip_address . "','" . $briportindex . "','" .  $briportvalue ."','" . $vlanvalue . "')";  
+//                $insert = $this->network_db->query($sql);
+
+                $LocalPort = $this->Get_SNMP_Data($switch_ip_address, $snmp_com.'@'.$vlanvalue,$local_port_oid.'.'.$briportvalue,INTVAL($snmpdata[0]['SNMP_VERSION']));
+
+                foreach($LocalPort as $locportindex => $locportvalue){
+                     
+//                     echo 'loc port index ' . $locportindex .'<br>';
+//                     echo 'loc port value ' . $locportvalue.'<br>';
+                     
+                    $locportindex=$locportindex.";";
+
+                    $local_port_oid=$local_port_oid . ";";
+
+                    $len=$this->utility->Str_ColumnCount($local_port_oid,1,";",".");
+
+                    $len += 1;
+
+                    $locportindex = $this->utility->str_block($locportindex,$len,1000,";",".");
+
+                    $locportindex=$this->utility->Chop_Last_Char($locportindex);
+                    $locportvalue=trim($this->utility->SNMP_Clean_Output($locportvalue));
+                    $local_port_oid=$this->utility->Chop_Last_Char($local_port_oid);
+
+//                    $sql="Insert into local_port values('".  $switch_ip_address . "','" . $locportindex . "','" . $locportvalue . "','" . $briportindex . "','" . $briportvalue ."','" . $vlanvalue . "')";  
+//                    $insert = $this->network_db->query($sql);
+                    
+                    $PortName = $this->Get_SNMP_Data($switch_ip_address, $snmp_com,$port_name_oid.'.'.$locportvalue,INTVAL($snmpdata[0]['SNMP_VERSION']));
+                    
+                    foreach($PortName as $portnameindex => $portnamevalue){
+//                         
+//                        echo 'port name index ' . $portnameindex .'<br>';
+//                        echo 'port name value ' . $portnamevalue.'<br>';
+                        
+                        $portnameindex=$portnameindex.";";
+
+                        $port_name_oid=$port_name_oid.";";
+
+                        $len=$this->utility->Str_ColumnCount($port_name_oid,1,";",".");
+
+                        $len += 1;
+
+                        $portnameindex = $this->utility->str_block($portnameindex,$len,1000,";",".");
+
+                        $portnameindex=$this->utility->Chop_Last_Char($portnameindex);
+                        $portnamevalue=trim($this->utility->SNMP_Clean_Output($portnamevalue));
+                        $port_name_oid=$this->utility->Chop_Last_Char($port_name_oid);
+
+                        $sql="Insert into port_data values('".  $switch_ip_address . "','" . $locportindex . "','" . $locportvalue . "','" . $briportindex . "','" . $briportvalue ."','" . $portnameindex . "','" . $portnamevalue ."','" . $vlanvalue . "')";  
+                        $insert = $this->network_db->query($sql);
+                        
+                    }
+                 
+                }
+                       
+            }
+        }
+        
+        $routersnmpdata = $this->snmp3data($arp_router_ip);
+        
+        $arp_mac_add_data = $this->Get_SNMP_Data($arp_router_ip, $snmp_com,'1.3.6.1.2.1.3.1.1.2',INTVAL($routersnmpdata[0]['SNMP_VERSION'])); 
+         
+        foreach($arp_mac_add_data as $arp_mac_index => $arp_mac_value){
+      
+            $arp_mac_index=$arp_mac_index.";";
+            
+            $arp_mac_add_oid=$arp_mac_add_oid . ";";
+                    
+            $len=$this->utility->Str_ColumnCount($arp_mac_add_oid,1,";",".");
+
+            $len += 3;
+            
+            $arp_mac_index = $this->utility->str_block($arp_mac_index,$len,1000,";",".");
+
+            $arp_mac_index=$this->utility->Chop_Last_Char($arp_mac_index);
+            $arp_mac_value=trim($this->utility->SNMP_Clean_Output($arp_mac_value));
+            $arp_mac_add_oid=$this->utility->Chop_Last_Char($arp_mac_add_oid);
+            
+            $sql="Insert into arp_mac_add values('".  $switch_ip_address . "','" . $arp_mac_index ."','" . $arp_mac_value . "')";  
+            $insert = $this->network_db->query($sql);
+  
+        } 
+        
+        foreach($vlan_name_data as $vlan_name_index => $vlan_name_value){
+        
+            $vlan_name_index=$vlan_name_index.";";
+            
+            $vlan_name_oid=$vlan_name_oid . ";";
+                    
+            $len=$this->utility->Str_ColumnCount($vlan_name_oid,1,";",".");
+
+            $len += 2;
+            
+            $vlan_name_index = $this->utility->str_block($vlan_name_index,$len,1000,";",".");
+
+            $vlan_name_index=$this->utility->Chop_Last_Char($vlan_name_index);
+            $vlan_name_value=trim($this->utility->SNMP_Clean_Output($vlan_name_value));
+            $vlan_name_oid=$this->utility->Chop_Last_Char($vlan_name_oid);
+            
+            $sql="Insert into vlan_name values('".  $switch_ip_address . "','" . $vlan_name_index ."','" . $vlan_name_value . "')";  
+            $insert = $this->network_db->query($sql);
+  
+        }
+        
+        foreach($trunck_port_data as $trunck_port_index => $trunck_port_value){
+        
+            $trunck_port_index=$trunck_port_index.";";
+            
+            $trunck_port_oid=$trunck_port_oid . ";";
+                    
+            $len=$this->utility->Str_ColumnCount($trunck_port_oid,1,";",".");
+
+            $len += 1;
+            
+            $trunck_port_index = $this->utility->str_block($trunck_port_index,$len,1000,";",".");
+
+            $trunck_port_index=$this->utility->Chop_Last_Char($trunck_port_index);
+            $trunck_port_value=trim($this->utility->SNMP_Clean_Output($trunck_port_value));
+            $trunck_port_oid=$this->utility->Chop_Last_Char($trunck_port_oid);
+            
+            $sql="Insert into trunck_port values('".  $switch_ip_address . "','" . $trunck_port_index ."','" . $trunck_port_value . "')";  
+            $insert = $this->network_db->query($sql);
+  
+        }
+      
+        $sql="Select distinct POD.switch_ip_address as Switch_IP,POD.local_port_index As IF_Index,POD.port_name_index As IF_Value,POD.port_name_value As Port_Name,
+                POD.vlan_id_value As VLAN_ID,VLN.vlan_name_value As VLAN_Name,
+                arp.arp_mac_add_index  As IP_Address,arp.arp_mac_add_value As MAC_Address
+                from port_data POD Left Join mac_addresses MACA 
+                On POD.switch_ip_address = MACA.switch_ip_address and POD.port_if_index=MACA.mac_index
+                left join arp_mac_add arp on MACA.mac_value=arp.arp_mac_add_value and MACA.switch_ip_address=arp.switch_ip_address
+                inner join vlan_name VLN  on POD.vlan_id_value=VLN.vlan_name_index and VLN.switch_ip_address = POD.switch_ip_address
+                Where POD.port_name_index Not In (Select trunck_port_index from trunck_port Where trunck_port_value=1 And switch_ip_address='" . $switch_ip_address ."') And 
+                POD.switch_ip_address='" . $switch_ip_address ." ' Order By port_name_index";
+ 
+        if ($this->network_db->trans_status() === FALSE)
+        {
+            $this->network_db->trans_rollback();
+        }
+        else
+        {
+            $this->network_db->trans_commit();
+        }
+          
+        $query = $this->network_db->query($sql);        
+        return $query->result_array();
+        
+        
+    }
+           
+}  
+
+
